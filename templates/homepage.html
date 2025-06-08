@@ -1,0 +1,11 @@
+<h1>Welcome to Messenger</h1>
+
+{% if user.is_authenticated %}
+  <p>Hello, {{ user.username }}! <a href="{% url 'user_list' %}">Go to Chat</a> | <form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+</p>
+{% else %}
+  <p><a href="{% url 'login' %}">Login</a> or <a href="{% url 'register' %}">Register</a></p>
+{% endif %}
