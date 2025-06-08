@@ -2,9 +2,10 @@
 
 <div id="chat-box" style="border:1px solid #ccc; padding:10px; height:300px; overflow-y:scroll;"></div>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
   {% csrf_token %}
-  <textarea name="content" rows="3" cols="50" placeholder="Write your message here..."></textarea><br>
+  <textarea name="content" rows="2" cols="50" placeholder="Write your message..."></textarea><br>
+  <input type="file" name="file"><br>
   <button type="submit">Send</button>
 </form>
 
@@ -17,15 +18,27 @@
       .then(data => {
         const chatBox = document.getElementById('chat-box');
         chatBox.innerHTML = '';
+
         data.messages.forEach(msg => {
           const p = document.createElement('p');
+
           let status = '';
           if (msg.sender === "{{ request.user.username }}") {
-            status = msg.is_read ? ' <span style="color:green;">✓ Read</span>' : ' <span style="color:gray;">✓ Sent</span>';
+            status = msg.is_read
+              ? ' <span style="color:green;">✓ Read</span>'
+              : ' <span style="color:gray;">✓ Sent</span>';
           }
-          p.innerHTML = `<strong>${msg.sender}</strong>: ${msg.content}${status}<br><small>${msg.timestamp}</small>`;
+
+          let html = `<strong>${msg.sender}</strong>: ${msg.content || ''}${status}<br><small>${msg.timestamp}</small>`;
+
+          if (msg.file) {
+            html += `<br><a href="${msg.file}" target="_blank" style="color:blue;">📎 Attachment</a>`;
+          }
+
+          p.innerHTML = html;
           chatBox.appendChild(p);
         });
+
         chatBox.scrollTop = chatBox.scrollHeight;
       });
   }
@@ -33,3 +46,4 @@
   loadMessages();
   setInterval(loadMessages, 3000);
 </script>
+

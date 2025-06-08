@@ -37,9 +37,15 @@ def chat_with(request, user_id):
 
     if request.method == 'POST':
         content = request.POST.get('content')
-        if content:
-            Message.objects.create(sender=request.user, recipient=other_user, content=content)
-            return redirect('chat_with', user_id=other_user.id)
+        uploaded_file = request.FILES.get('file')
+        if content or uploaded_file:
+            Message.objects.create(
+                sender=request.user,
+                recipient=other_user,
+                content=content,
+                file=uploaded_file
+            )
+        return redirect('chat_with', user_id=other_user.id)
 
     return render(request, 'chat.html', {
         'other_user': other_user,
@@ -66,7 +72,9 @@ def get_messages(request, user_id):
             'sender': msg.sender.username,
             'content': msg.content,
             'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'is_read': msg.is_read
+            'is_read': msg.is_read,
+            'file': msg.file.url if msg.file else None
+
         }
         for msg in messages
     ]
